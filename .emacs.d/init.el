@@ -1,22 +1,28 @@
-;; installed packages (2013/02/12)
-;; color-theme-20080305.834
-;; color-theme-monokai-0.0.5
-;; elscreen-20120413.1107
-;; evil-20130325.2034
-;; evil-leader-20130316.1414
-;; evil-numbers-20121109.238
-;; evil-paredit-20130205.1053
-;; goto-chg-20080919.2256
-;; helm-20130326.1626
-;; htmlize-20130207.2102
-;; melpa-20120202.1322
-;; paredit-20110508.1256
-;; paredit-menu-20121025.1201
-;; powerline-20130325.2244
-;; redo+-20120811.1102
-;; surround-20121022.1257
-;; undo-tree-20130317.1532
-;; window-number-20100803.1327
+(setq installing-package-list
+  '(
+    color-theme
+    color-theme-monokai
+    elscreen
+    evil
+    evil-leader
+    evil-numbers
+    evil-paredit
+    goto-chg
+    helm
+    htmlize
+    melpa
+    paredit
+    paredit-menu
+    powerline
+    redo+
+    surround
+    undo-tree
+    window-number
+    smooth-scroll
+    e2wm
+    multiple-cursors
+    clojure-mode
+    ))
 
 ;; goto-last-change.el
 ; (global-set-key (kbd "C-;") 'goto-last-change)
@@ -30,7 +36,7 @@
 ;; (toggle-debug-on-error)
 
 ;; environment variable
-(setenv "PCTYPE" (if (string-match "2a07" (getenv "PROCESSOR_REVISION")) "work" "home"))
+(setenv "PCTYPE" (if (string-match "2a07" (or (getenv "PROCESSOR_REVISION") "")) "work" "home"))
 (setenv "TMP" (or (getenv "TMP") "/tmp"))
 (setenv "DROPBOX_PATH" (or (getenv "DROPBOX_PATH") (expand-file-name "~/Dropbox")))
 (setenv "bk" "\"c:/Program Files/Git/bin/sh.exe\" --login -c \"$DROPBOX_PATH/home/tools/hg-backup.sh\"")
@@ -67,6 +73,17 @@
 (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 (package-initialize)
 (require 'melpa nil t)
+
+(defun myinstall ()
+  (interactive)
+  ;; http://qiita.com/items/5f1cd86e2522fd3384a0
+  (let ((not-installed (loop for x in installing-package-list
+                             when (not (package-installed-p x))
+                             collect x)))
+    (when not-installed
+      (package-refresh-contents)
+      (dolist (pkg not-installed)
+        (package-install pkg)))))
 
 ; auto-install
 ; ;; まず、install-elisp のコマンドを使える様にします。
@@ -106,10 +123,11 @@
 (when (eq window-system 'w32)
 
 (setenv "LANG" "ja")
+(setenv "RUBYOPT" "-Ku")
 
 ;; http://d.hatena.ne.jp/khiker/20090711/emacsfullscreen
 ;; (set-frame-parameter nil 'fullscreen 'maximized)
-(set-frame-parameter nil 'alpha 92)
+(set-frame-parameter nil 'alpha 96)
 
 ;; font
 ;; (face-attribute 'default :fontset)
@@ -121,11 +139,11 @@
 ;; (set-face-attribute 'default nil :height 116 :family "Migu 1M regular")
 (set-face-attribute 'default nil :height 110 :family "Consolas")
 (set-fontset-font nil 'japanese-jisx0208
-				  nil)
-				  ;; (font-spec :family "Migu 1M regular" :size 16))
-				  ;; (font-spec :family "Meiryo" :size 16))
-				  ;; (font-spec :family "MeiryoKe_Gothic" :size 8))
-				  ;; (font-spec :family "MeiryoKe_Console" :size 8))
+                  nil)
+                  ;; (font-spec :family "Migu 1M regular" :size 16))
+                  ;; (font-spec :family "Meiryo" :size 16))
+                  ;; (font-spec :family "MeiryoKe_Gothic" :size 8))
+                  ;; (font-spec :family "MeiryoKe_Console" :size 8))
 ;; (set-fontset-font nil 'japanese-jisx0208 nil)
 ;; (setq face-font-rescale-alist '())
 ;; (add-to-list 'face-font-rescale-alist '("Migu 1M regular" . 1.1))
@@ -138,11 +156,11 @@
               ;; (expand-file-name "~/.emacs.d/bin")
               "C:\\Python27"
               "C:\\Python27\\Scripts"
-              "C:\\Ruby193\\bin"
+              "C:\\Ruby200\\bin"
               "C:\\MinGW\\bin"              ; for gcc command
               "C:\\MinGW\\msys\\1.0\\bin"   ; for make command
               "C:\\Program Files\\Git\\bin" ; for grep command
-              "C:\\Program Files\\Microsoft F#\\v4.0"
+              ;; "C:\\Program Files\\Microsoft F#\\v4.0"
               ;; "C:\\Program Files\\FSharp-2.0.0.0\\bin"
               (expand-file-name (substitute-in-file-name "$DROPBOX_PATH\\windows\\software\\bin"))
               ;; (expand-file-name (substitute-in-file-name "$DROPBOX_PATH\\home\\tools"))
@@ -206,9 +224,7 @@
 ;; windows }}}
 
 (define-key my-anything-prefix "\C-s" 'eval-buffer)
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (define-key emacs-lisp-mode-map (kbd "C-c C-e") 'eval-last-sexp)))
+(define-key lisp-mode-shared-map (kbd "C-c C-e") 'eval-last-sexp)
 
 ;; Utility for org-babel
 (defun transpose (m)
@@ -220,6 +236,9 @@
 (defun slice (str beg end)
   (let ((len (length str)))
     (substring str (min index len) (min (+ index size) len))))
+
+(defun average (&rest values)
+  (/ (apply '+ values) (length values)))
 
 ;; データソースをテーブルに出力するための関数
 (list
@@ -294,7 +313,8 @@
 
 ;; appearance
 (setq-default tab-width 4)
-;; (setq-default indent-tabs-mode nil)
+(setq-default tab-stop-list (number-sequence 4 100 4))
+(setq-default indent-tabs-mode nil)
 (column-number-mode t)
 ;; (global-linum-mode 0)
 ;; (global-hl-line-mode t)
@@ -306,6 +326,10 @@
 ;; 行末の空白を強調表示
 (setq-default show-trailing-whitespace t)
 ;; TODO 全角空白・タブ文字の強調表示
+
+(global-whitespace-mode 1)
+;; (setq whitespace-style '(face tabs spaces trailing lines space-before-tab newline indentation empty space-after-tab space-mark tab-mark newline-mark))
+(setq whitespace-style '(face tabs trailing space-before-tab newline space-after-tab tab-mark))
 
 ;; behaviour
 (defalias 'yes-or-no-p 'y-or-n-p)
@@ -322,7 +346,12 @@
 
 ;; http://www.emacswiki.org/DeskTop
 (desktop-save-mode 1)
-(setq desktop-files-not-to-save "[^o][^r][^g]$")
+;; (setq desktop-files-not-to-save "[^o][^r][^g]$")
+(setq desktop-files-not-to-save "[^o][^r][^!]$")
+;; (defadvice ad-desktop-save-buffer-p (after desktop-save-buffer-p activate)
+;;   (let* ((filename (ad-get-arg 0))
+;;          (to-save (string-match "\\.el$" filename)))
+;;     (setq ad-return-value (or ad-return-value (not to-save)))))
 
 ;; scroll
 (setq scroll-conservatively 1)
@@ -356,7 +385,8 @@
 
 ;; key mapping
 (global-set-key (kbd "C-m") 'comment-indent-new-line)
-(global-set-key (kbd "C-h") 'delete-backward-char)
+;; (global-set-key (kbd "C-h") 'delete-backward-char)
+(keyboard-translate ?\C-h ?\C-?)
 
 (global-set-key (kbd "M-p") 'previous-error)
 (global-set-key (kbd "M-n") 'next-error)
@@ -405,6 +435,10 @@
   ;; (setq helm-split-window-default-side 'right)
   (setq helm-ff-toggle-auto-update nil)
   (setq helm-ff-transformer-show-only-basename t)
+
+  ;; http://fukuyama.co/nonexpansion
+  (custom-set-variables '(helm-ff-auto-update-initial-value nil))
+
   ; (global-set-key "\C-xx" 'helm-swap-windows)
   (global-set-key "\C-@" 'helm-for-files)
   (global-set-key "\M-x" 'helm-M-x)
@@ -455,16 +489,21 @@
 ;; (org-remember-insinuate)
 (setq org-log-done 'time)
 
-(setq org-startup-folded nil)
+;; (setq org-startup-folded nil)
 (setq org-enforce-todo-dependencies t)
 ;; (setq org-enforce-todo-checkbox-dependencies t)
+(setq org-src-fontify-natively t)
 
 ;; org-babel
 (eval-after-load "org"
   '(progn
      (require 'ob-sh)
      (require 'ob-C)
-     (require 'ob-python)))
+     (require 'ob-python)
+     (when (and (require 'org-export-diag nil t) (eq window-system 'w32))
+       (defadvice myad-org-export-blocks-format-diag (around org-export-blocks-format-diag (&rest args) activate)
+         (apply 'org-export-blocks-format-diag (append args '("-f C:\\Windows\\Fonts\\meiryo.ttc")))))
+     ))
 
 (setq org-use-fast-tag-selection t)
 (setq org-todo-keywords
@@ -522,9 +561,11 @@
         ("m" "Menu Index"   entry (file+headline "index.org" "Menu") "* TODO %?\n SCHEDULED: %t")
         ("s" "Sublime Text" entry (file+datetree "SublimeText.org") "* TODO [#C] %?")
         ("S" "Sublime Tips" entry (file+headline "SublimeText.org" "Tips") "* TODO %?")
+        ("P" "Sublime Packages" entry (file+headline "SublimeText.org" "Packages") "* TODO %?")
         ("C" "Clock"    entry (clock) "* TODO %?\n SCHEDULED: %t")
         ("p" "Project"  entry (file+datetree (substitute-in-file-name "$PROJECTFILE")) "* TODO %?\n SCHEDULED: %T")
         ("h" "Home"     entry (file+datetree (substitute-in-file-name "$NOTEHOME/org/home.org")) "* TODO %?\n SCHEDULED: %t")
+        ("w" "Work"   entry (file+datetree "work.org") "* TODO %?\n SCHEDULED: %t")
         ))
 
 (setq org-agenda-persistent-filter t)
@@ -558,6 +599,9 @@
 ;; http://orgmode.org/manual/Exporting-Agenda-Views.html
 (setq org-agenda-custom-commands
       '(("X" agenda "" nil ("~/../agenda-view.html"))
+        ("w" agenda "" ((org-agenda-category-filter '("-SublimeText"))))
+        ("a" agenda "" ((org-agenda-category-filter '("-agenda" "-SublimeText"))))
+        ("x" "Unscheduled TODO" tags-todo "-SCHEDULED>=\"<now>\"" nil)
         ))
 
 ;; http://orgmode.org/manual/Exporting-Agenda-Views.html#fn-4
@@ -580,13 +624,24 @@
 (setq org-export-html-postamble nil)    ; 著者名等は不要
 ;; (setq org-export-preserve-breaks t) ; or #+OPTIONS: \n:t
 (setq org-export-with-tags nil)
-(setq org-export-with-emphasize nil)
+;; (setq org-export-with-emphasize nil)
 (setq org-export-with-sub-superscripts nil)
 ;; (setq org-fontify-emphasized-text nil)
 
-;; ;; Add "Mark of the Web"
-;; (setq org-export-html-xml-declaration "<?xml version=\"1.0\" encoding=\"%s\"?>
-;; <!-- saved from url=(0014)about:internet -->")
+(setq org-export-html-toplevel-hlevel 1) ; <h1>
+
+;; html-style
+(setq org-export-html-style "
+<style type=\"text/css\">
+ <!--/*--><![CDATA[/*><!--*/
+       // html { font-family: sans-serif; font-size: 12pt; }
+       html { font-family: MeiryoKe_UIGothic; }
+  /*]]>*/-->
+</style>")
+
+;; Add "Mark of the Web"
+(setq org-export-html-xml-declaration "<?xml version=\"1.0\" encoding=\"%s\"?>
+<!-- saved from url=(0014)about:internet -->")
 
 ;; org-export-html
 (defun my-org-export-as-html (arg)
@@ -641,8 +696,6 @@
 ;          )
 ;         ))
 
-(setq org-M-RET-may-split-line '((default . nil)))
-
 ;; memo/org-capture
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
@@ -650,11 +703,12 @@
 
 (add-hook 'org-mode-hook
       (defun my-org-mode-map ()
-        (setq indent-tabs-mode nil)
+        ;; (setq indent-tabs-mode nil)
         (setq evil-auto-indent nil)
         ;; (global-set-key "\C-j" nil)
         ;; (define-key org-mode-map "\C-j" 'org-return-indent)
 
+        (define-key org-mode-map [(meta return)] nil) ; use global
         (define-key org-mode-map "\C-y" nil)        ; disable org-yank
         ;; (define-key org-mode-map (kbd "C-c ,") nil) ; for howm keybind
         ;; (define-key org-mode-map "\M-2" 'my-org-export-as-excel-text)
@@ -664,41 +718,48 @@
         (define-key org-mode-map [(control right)] 'org-shiftright)
         (define-key org-mode-map [(tab)] 'my-org-cycle)
         (define-key org-mode-map [(shift tab)] 'my-org-shifttab)
-        ;; (define-key org-mode-map [(meta return)] 'org-insert-heading-after-current)
         (define-key org-mode-map [(return)]
           (lambda ()
             (interactive)
-			(let ((org-table-automatic-realign (or (not (evil-normal-state-p)) (buffer-modified-p))))
-			  (if (and (evil-normal-state-p) (not (org-at-table-p)))
-				  (progn      ; check and move next
-					(org-ctrl-c-ctrl-c)
-					(evil-next-line))
-				(org-return))))) ; normal return
+            (let ((org-table-automatic-realign (or (not (evil-normal-state-p)) (buffer-modified-p))))
+              (if (and (evil-normal-state-p) (not (org-at-table-p)))
+                  (progn      ; check and move next
+                    (org-ctrl-c-ctrl-c)
+                    (evil-next-line))
+                (org-return))))) ; normal return
         (define-key org-mode-map (kbd "C-c C-c")
-		  (lambda ()
-			(interactive)
-			(if (and (org-at-heading-p) (not org-occur-highlights))
-				(org-todo)
-			  (org-ctrl-c-ctrl-c))))
+          (lambda ()
+            (interactive)
+            (if (and (org-at-heading-p) (not org-occur-highlights))
+                (org-todo)
+              (org-ctrl-c-ctrl-c))))
         (define-key org-mode-map (kbd "C-c T")
-		  (lambda () (interactive) (org-show-todo-tree '(4))))
+          (lambda () (interactive) (org-show-todo-tree '(4))))
         (define-key org-mode-map (kbd "C-c t")
-		  (lambda () (interactive) (org-occur (concat "^" org-outline-regexp " *" (org-fast-todo-selection)))))
+          (lambda () (interactive) (org-occur (concat "^" org-outline-regexp " *" (org-fast-todo-selection)))))
         ))
 
 (add-hook 'org-agenda-mode-hook
       (defun my-org-agenda-mode-map ()
         (define-key org-agenda-mode-map ">" (lambda () (interactive) (org-agenda-filter-by-category t)))
-		))
+        ))
 
 ;; org-modeに限らず使用する
-(global-set-key [(meta return)] 'org-insert-heading)
+(global-set-key [(meta return)] 'my-org-meta-return)
+(setq org-M-RET-may-split-line '((default . nil)))
+;; (setq org-M-RET-may-split-line '((default . nil) (item . t) (table . t)))
+(defun my-org-meta-return (&optional arg)
+  (interactive "P")
+  (if (evil-normal-state-p)
+      (evil-insert 1))
+  (call-interactively 'org-meta-return))
 
 ;; org-table
 (setq org-table-automatic-realign t)
 (setq org-table-copy-increment t)
 
 (defun my-org-cycle (&optional arg)
+  "Do not realign table when evil-normal-state or buffer not modified."
   (interactive "P")
   (let ((org-table-automatic-realign (or (not (evil-normal-state-p)) (buffer-modified-p))))
     (org-cycle arg)))
@@ -821,6 +882,7 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
 ;; (setq evil-want-C-w-in-emacs-state t)
 (setq evil-want-C-i-jump nil)
 (modify-syntax-entry ?_ "w")
+(global-subword-mode t)
 
 (when (require 'evil nil t)
   (evil-mode t)
@@ -891,6 +953,8 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
   (define-key evil-normal-state-map "gk" 'evil-previous-line)
 
   ;; http://d.hatena.ne.jp/tarao/20130304/evil_config#emacs-evilize
+  (evil-declare-not-repeat 'my-org-cycle)
+  (evil-declare-not-repeat 'my-org-shifttab)
 
   ;; evil-comment
   (define-key evil-normal-state-map "\M-;"
@@ -913,6 +977,8 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
           (setq mark-active nil))
       ;; http://www.geocities.co.jp/SiliconValley-Bay/9285/ELISP-JA/elisp_304.html
       (execute-kbd-macro (concat "\M-9" (read-key-sequence nil)))))
+  ;; (define-key evil-normal-state-map "\C-w" 'my-ctrl-w-prefix)
+  (define-key evil-motion-state-map "\C-w" 'my-ctrl-w-prefix)
   (global-set-key "\C-w" 'my-ctrl-w-prefix)
   (global-set-key "\M-9" 'evil-window-map)
 
@@ -926,18 +992,24 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
     (interactive "r")
     (let ((x-select-enable-clipboard t))
       (kill-region beg end yank-handler)))
-  (defun clipboard-kill-ring-save (beg end)
-    (interactive "r")
+  (evil-define-operator clipboard-evil-yank (beg end type register yank-handler)
+    "Yank to clipboard."
+    :move-point nil
+    :repeat nil
+    (interactive "<R><x><y>")
     (let ((x-select-enable-clipboard t))
-      ;; (evil-yank beg end)))
-      (kill-ring-save beg end))
-    (message (concat "cell count: "
-                     (number-to-string (/ (length (split-string (substring-no-properties (car kill-ring)) "\"")) 2))))
+      (evil-yank beg end type register yank-handler))
+    ;; (message (concat "cell count: "
+    ;;                  (number-to-string (/ (length (split-string (substring-no-properties (car kill-ring)) "\"")) 2))))
     )
 
   (define-key evil-insert-state-map "\C-v" 'clipboard-cua-paste)
   (global-set-key "\C-y" 'clipboard-cua-paste)
-  (global-set-key "\M-w" 'clipboard-kill-ring-save)
+  (global-set-key "\M-w" 'clipboard-evil-yank)
+
+  ;; indent
+  (define-key evil-insert-state-map [(shift tab)] 'tab-to-tab-stop)
+  (define-key esc-map "i" 'indent-relative)
   )
 
 
@@ -967,7 +1039,7 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
 
   ;; auto ime off
   (when (featurep 'evil)
-	;; (define-key evil-insert-state-map "\C-j" 'toggle-input-method)
+    ;; (define-key evil-insert-state-map "\C-j" 'toggle-input-method)
     (add-hook 'evil-insert-state-entry-hook (lambda () (if (ime-get-mode) (toggle-input-method))))
     (add-hook 'evil-insert-state-exit-hook  (lambda () (if (ime-get-mode) (toggle-input-method))))
     ))
@@ -975,11 +1047,11 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
 ;; ibus.el
 (when (eq window-system 'x)
   (when (require 'ibus nil t)
-	(add-hook 'after-init-hook 'ibus-mode-on)
-	(when (featurep 'evil)
+    (add-hook 'after-init-hook 'ibus-mode-on)
+    (when (featurep 'evil)
       (add-hook 'evil-insert-state-entry-hook (lambda () (if ibus-imcontext-status (ibus-disable))))
       (add-hook 'evil-insert-state-exit-hook  (lambda () (if ibus-imcontext-status (ibus-disable))))
-	)))
+      )))
 
 ;; window-number.el
 (require 'window-number)
@@ -1036,8 +1108,8 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
         ;; (flymake-mode nil)
       ))
 
-(when (require 'powerline nil t)
-  (powerline-default))
+;; (when (require 'powerline nil t)
+;;   (powerline-default-theme))
 
 (when (eq window-system 'w32)
   ; (w32-send-sys-command #xf030) ; maximizing window
@@ -1071,6 +1143,38 @@ See `font-lock-add-keywords' and `font-lock-defaults'."
 ;; (color-theme-monokai)
 
 ;; '(outline-4 ((t (:foreground "slate gray"))))
+
+
+;; (when (require 'smooth-scroll nil t)
+;;   (smooth-scroll-mode t)
+;;   (setq smooth-scroll/vscroll-step-size 32)
+;;   )
+
+
+(when (require 'e2wm nil t)
+  (global-set-key (kbd "M-+") 'e2wm:start-management)
+  )
+
+
+(when (require 'multiple-cursors nil t)
+  ;; https://github.com/magnars/multiple-cursors.el
+  (global-set-key (kbd "<M-S-down>") 'mc/mark-previous-like-this)
+  (global-set-key (kbd "<M-S-down>") 'mc/mark-next-like-this)
+  )
+
+
+(when (require 'paredit nil t)
+  (add-hook 'clojure-mode-hook 'paredit-mode)
+  (when (require 'evil-paredit nil t)
+    (add-hook 'clojure-mode-hook 'evil-paredit-mode)
+    )
+  )
+
+
+(defconst *dmacro-key* (kbd "C-M-y") "繰返し指定キー")
+(global-set-key *dmacro-key* 'dmacro-exec)
+(autoload 'dmacro-exec "dmacro" nil t)
+
 
 ;; Save for future sessions.
 (put 'upcase-region 'disabled nil)
